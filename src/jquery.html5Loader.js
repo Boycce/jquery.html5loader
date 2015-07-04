@@ -287,7 +287,10 @@
         size = file.size,
         $image = $('<img>');
 
-      $image.on('load', function() {
+      $image.on('load', loaded);
+      $image.on('error', error);
+
+      function loaded () {
         log('File Loaded:' + file.source);
         _bytesLoaded += size;
         onElementLoaded(file, this);
@@ -295,7 +298,11 @@
         _files[_currentSegment].splice(0, 1);
         updatePercentage();
         defer.resolve();
-      });
+      }
+      function error() {
+        log('\n File Failed: ' + file.source +
+            '\n Message:     Could not load\n');
+      }
 
       $image.attr('src', file.source);
 
@@ -304,6 +311,7 @@
 
       return defer.promise();
     };
+
 
     /*
      *
@@ -452,10 +460,6 @@
           // IE8/7 fix
           // http://stackoverflow.com/questions/805384/how-to-apply-inline-and-or-external-css-loaded-dynamically-with-jquery
 
-          // Cant use bellow cause browser won't cache css.
-          //if (isCss) $('<style />').html(data).appendTo('head');
-
-          
           if (isCss)
             if (document.createStyleSheet) {
               try {
@@ -471,7 +475,6 @@
               $head[0].appendChild(css);
             }
           
-
           defer.resolve(data);
         }
       });
